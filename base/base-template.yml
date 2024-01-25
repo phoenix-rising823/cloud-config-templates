@@ -1,0 +1,47 @@
+users:
+  - name: <username>
+    lock_passwd: false
+    passwd: <hashed password>
+    groups: <groups>
+    ssh_authorized_keys:
+      - <add ssh keys here>
+    shell: /bin/bash
+
+hostname: myhost
+fqdn: myhost.domain.local
+prefer_fqdn_over_hostname: true
+
+write_files:
+  - path: /etc/ssh/sshd_config
+    content: |
+         Protocol 2
+         HostKey /etc/ssh/ssh_host_rsa_key
+         HostKey /etc/ssh/ssh_host_dsa_key
+         HostKey /etc/ssh/ssh_host_ecdsa_key
+         HostKey /etc/ssh/ssh_host_ed25519_key         
+         SyslogFacility AUTH
+         LogLevel INFO
+         LoginGraceTime 120
+         PasswordAuthentication no
+         PermitRootLogin no
+         StrictModes yes
+         PubkeyAuthentication yes
+         IgnoreRhosts yes
+         HostbasedAuthentication no
+         PermitEmptyPasswords no
+         ChallengeResponseAuthentication no
+         PrintLastLog yes
+         TCPKeepAlive yes
+         AcceptEnv LANG LC_*         
+         UsePAM yes
+
+packages:
+  - mlocate
+  - unzip
+  - tar
+  - policycoreutils-python-utils
+  - rsync
+  - nfs-utils
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true

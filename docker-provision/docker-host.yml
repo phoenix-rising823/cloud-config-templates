@@ -1,0 +1,56 @@
+users:
+  - name: <username>
+    groups: <groups>
+    lock_passwd: false
+    passwd: <hashed password>
+    ssh_authorized_keys:
+      - <add ssh keys here>
+    shell: /bin/bash
+write_files:
+  - path: /etc/ssh/sshd_config
+    content: |
+         Protocol 2
+         HostKey /etc/ssh/ssh_host_rsa_key
+         HostKey /etc/ssh/ssh_host_dsa_key
+         HostKey /etc/ssh/ssh_host_ecdsa_key
+         HostKey /etc/ssh/ssh_host_ed25519_key         
+         SyslogFacility AUTH
+         LogLevel INFO
+         LoginGraceTime 120
+         PasswordAuthentication no
+         PermitRootLogin no
+         StrictModes yes
+         PubkeyAuthentication yes
+         IgnoreRhosts yes
+         HostbasedAuthentication no
+         PermitEmptyPasswords no
+         ChallengeResponseAuthentication no
+         PrintLastLog yes
+         TCPKeepAlive yes
+         AcceptEnv LANG LC_*
+         Subsystem sftp /usr/lib/openssh/sftp-server
+         UsePAM yes
+
+hostname: myhost
+fqdn: myhost.domain.local
+prefer_fqdn_over_hostname: true
+packages:
+  - mlocate
+  - unzip
+  - tar
+  - policycoreutils-python-utils
+  - rsync
+  - nfs-utils
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+runcmd:
+  - firewall-cmd --permanent --add-port={2377,7946}/tcp
+  - firewall-cmd --permanent --add-port={4789,7946}/udp
+  - firewall-cmd --permanent --remove-service cockpit
+  - firewall-cmd --reload
+  - dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  - dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - systemctl enable --now docker
+  - gpasswd -a <user> docker
